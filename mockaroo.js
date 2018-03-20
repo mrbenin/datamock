@@ -8,9 +8,9 @@ class mockaroo{
 
     obterMock(callback){
        
-        this.request.get('https://my.api.mockaroo.com/participabeneficio.json?key=b7b9ce40', function(error,response,body)
+        this.request.get('https://api.myjson.com/bins/107dd7', function(error,response,body)
         {
-            console.log('Erro: ', error);
+            console.log('Erro: ', error == null ? "Sem erros" : error );
             console.log('Status Code: ', response && response.statusCode);
 
             if(!error && response.statusCode == 200){
@@ -20,7 +20,7 @@ class mockaroo{
             }else{
                 console.log("Erro ao retornar valores da API");
                 callback(null);
-            }
+            } 
         });
     }
 };
