@@ -18,17 +18,40 @@ app.get('/', function(req,res){
 });
 
 
-app.get('/buscaPorBeneficio', function(req,res){ 
-
-    const singleton = new JsonClient();
-
-    singleton.get('cpf',"19273929615", function(resultado){
-        res.send(resultado);
-    });
-
-
+app.get('/buscaBeneficio', function(req,res){ 
    
+    const singleton = new JsonClient();
+    
+    if(req.query.beneficio){
+        singleton.get('beneficio',req.query.beneficio, function(resultado){
+            res.send(resultado);
+        });
+    }else if(req.query.cpf){
+        singleton.get('cpf',req.query.cpf, function(resultado){
+            res.send(resultado);
+        });
+    }else if(req.query.nit){
+        singleton.get('nit',req.query.nit, function(resultado){
+            res.send(resultado);
+        });
+    }else if(req.query.nome && req.query.nomeMae && req.query.dataNascimento){
+
+        var parametro = {
+            nome : req.query.nome,
+            nomeMae : req.query.nomeMae,
+            dataNascimento : req.query.dataNascimento
+        }
+
+        singleton.get('nome',parametro, function(resultado){
+            res.send(resultado);
+        });
+
+    }else{
+        res.send("Erro: Falta parâmetro");
+    }
 });
+
+
 
 app.get('/install', function(req,res){
     var Install = require('./install');

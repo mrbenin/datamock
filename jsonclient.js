@@ -16,62 +16,76 @@ class JsonClient {
 
     } 
     
-    _buscaJson(callback){
+    get(tipo,parametro,retorno){
         var myself = this;
-        if(this._json == null){
-            
-            this._request.get(this._url, function(error,response,body){
-                console.log('Erro: ', error == null ? "Sem erros" : error );
-                console.log('Status Code: ', response && response.statusCode);
-               if(!error && response.statusCode == 200){
-                    console.log("Retornando valores da API");
-                    myself._json = body;
-                    console.log(myself._json);
-                }else{
-                    console.log("Erro ao retornar valores da API");
-                    myself._json = null;
-                } 
+        return new Promise(function(resolve,reject){
+            myself.___search(tipo,parametro).then(function(resultado){
+                retorno(resultado);
             });
-        }
-
-        var obj = JSON.parse(myself._json);
-
-        for(var x in obj){
-            console.log(x['numeroBeneficio']);
-        }
-
-        console.log(myself._json);
-        callback(myself._json);
-
-    }
-
-  
-    get(metodo,parametro,retorno){
-        try{
-            this["_"+metodo](parametro,retorno);
-        }catch(e){
-            if(e instanceof TypeError){
-                console.log("Erro: Chamada a método inexistente");
-            }
-        }
-    }
-
-
-
-    _beneficio(parametro,retorno) {
-        this._buscaJson(function(data){
-           var obj = JSON.parse(data);
-           console.log(obj); 
         });
     }
-    
-    _cpf(parametro,retorno){
+
+    ___search(tipo,parametro){
         var myself = this;
-        this._buscaJson(function(data){
-            var obj = JSON.parse(data);
-            //console.log(obj);
-            retorno(data);
+
+        return new Promise(function(resolve,reject){
+            myself.___parse().then(function(val){
+                var jsonRetorno = new Array();
+                var filtro;
+                
+                for(var i = 0; i < val.length; i++){
+                    switch(tipo){
+                        case 'beneficio' :
+                            if(val[i].numeroBeneficio == parametro)
+                                jsonRetorno.push(val[i]);
+                        break;
+                        case 'cpf' :
+                            if(val[i].numeroCPF == parametro)
+                            jsonRetorno.push(val[i]);
+                        break;
+
+                        case 'nit' :
+                            if(val[i].numeroNIT == parametro)
+                            jsonRetorno.push(val[i]);
+                        break;
+
+                        case 'nome' :
+                            if(val[i].nome == parametro.nome && val[i].nomeMae == parametro.nomeMae && val[i].dataNascimento == parametro.dataNascimento)
+                            jsonRetorno.push(val[i]);
+                        break;
+                    }
+                }
+                
+                if(jsonRetorno.length > 0){
+                    resolve(jsonRetorno);    
+                }else{
+                    resolve({"retorno" : "Nenhum resultado encontrado"});
+                }
+    
+           }).catch(function(err){
+                console.error(err);
+           });
         });
+    }
+
+    ___parse(){
+        var self = this;
+            return new Promise(function(resolve,reject){
+               if(self._json == null){
+                   self._request.get(self._url, function(error,response,body){
+                       if(error) return reject(error);
+                       try{
+                            self._json = JSON.parse(body);
+                            resolve(self._json);
+                       }catch(e){
+                           reject(e);
+                       }
+                   });
+               }else{
+                   resolve(self._json);
+               }
+            });
+        
     }
 
 };
